@@ -1,0 +1,130 @@
+
+        var produto = Produto.builder()
+                .categoria("prato principal")
+                .descricao("churrasco a moda da casa")
+                //.id(1L)
+                .nome("Churrasco")
+                .preco(BigDecimal.valueOf(50))
+                .disponivel(true)
+                .build();
+        var produtoDAO = new ProdutoDAO();
+       // produtoDAO.save(produto);
+        //System.out.println(produtoDAO.produtoByID(1L));
+        //System.out.println(produtoDAO.getAllProdutos());
+        //System.out.println(produtoDAO.getAllProdutosByPrice(BigDecimal.valueOf(10)));
+        //System.out.println(produtoDAO.findByNameLike("Batata"));
+        //System.out.println(produtoDAO.delete(8L));
+        //System.out.println(produtoDAO.update(9L,"Churros"));
+
+
+        var pessoaDAO = new PessoaDAO();
+        var pessoa = Pessoa.builder()
+                .endereco(Endereco.builder()
+                        .bairro("jardim")
+                        .cidade("cajazeiras")
+                        .rua("projetada")
+                        .numero("50")
+                        .build())
+                .nome("filipe")
+                .cpf("41272119203")
+                .email("F@.com")
+                .build();
+
+        //pessoaDAO.save(pessoa);
+
+
+        var cardapioDAO = new CardapioDAO();
+
+        var produtos = produtoDAO.getAllProdutos();
+
+
+        var cardapio = Cardapio.builder()
+                /*.produtos(List.of(Produto.builder()
+                                .categoria("Entrada")
+                                .descricao("Oriental")
+                                .disponivel(true)
+                                .preco(BigDecimal.valueOf(50.5))
+                        .build()))*/
+                .produtos(produtos)
+                .build();
+
+         //cardapioDAO.save(cardapio);
+
+        var cardapioExistente = cardapioDAO.cardapio(5L);
+
+       // cardapioExistente.setProdutos(produtos);
+        //cardapioDAO.update(cardapioExistente);
+
+        var cliente = pessoaDAO.findById(7L);
+
+        var itensPedidos = new ArrayList<ItemCardapio>();
+
+        var item1 =  new ItemCardapio();
+        item1.setQuantidade(5);
+        item1.setProduto((Produto) produtos.get(1));
+        item1.setSubTotal(item1.calculaSubtotal().doubleValue());
+
+        var item2 =  new ItemCardapio();
+        item2.setQuantidade(3);
+        item2.setProduto((Produto) produtos.get(2));
+        item2.setSubTotal(item2.calculaSubtotal().doubleValue());
+
+        var item3 =  new ItemCardapio();
+        item3.setQuantidade(2);
+        item3.setProduto((Produto) produtos.get(5));
+        item3.setSubTotal(item3.calculaSubtotal().doubleValue());
+
+
+
+        itensPedidos.add(item1);
+        itensPedidos.add(item2);
+        itensPedidos.add(item3);
+
+        var pedidoService = new PedidoService();
+
+        pedidoService.setCliente(cliente);
+        pedidoService.setItens(itensPedidos);
+
+        System.out.println("Cliente: " + cliente.getNome());
+        itensPedidos.forEach(
+                i -> System.out.println("Item: " +i.getProduto().getNome() +" "+
+                        "Preco Unitario: " + i.getProduto().getPreco() +" "+
+                        "Quantidade: " + i.getQuantidade()+" "+
+                        "Subtotal: " + pedidoService.subtotal(i))
+        );
+
+        var total = new BigDecimal(BigInteger.ZERO);
+        for (ItemCardapio i : itensPedidos){
+
+            total = total.add(pedidoService.subtotal(i));
+        }
+        System.out.println("Valor Total: "+total);
+
+        var pedido = Pedido.builder()
+                .pessoa(cliente)
+                .itensPedido(itensPedidos)
+                .total(total)
+                .build();
+        var pedidoDAO = new PedidoDAO();
+        pedidoDAO.save(pedido);
+
+
+        // Cria uma lista de itens de pedido
+        List<ItemCardapio> itensPedidos = new ArrayList<>();
+        itensPedidos.add(
+                ItemCardapio.builder()
+                        .produto(lista_Produto) // Define o produto recuperado do banco
+                        .quantidade(3)    // Define a quantidade de itens
+                        .subTotal(lista_Produto.getPreco().multiply(new BigDecimal(3)).doubleValue()) // Define o subtotal
+                        .build() // Finaliza a criação do objeto
+        );
+        System.out.println("Cliente: " + cliente.getNome());  // Assumindo que a classe Pessoa tenha o método getNome()
+
+// Itera sobre a lista de itens e imprime detalhes de cada um
+        for (ItemCardapio item : itensPedidos) {
+            System.out.println("Produto: " + item.getProduto().getNome());  // Nome do produto
+            System.out.println("Quantidade: " + item.getQuantidade());      // Quantidade
+            System.out.println("Preço unitário: " + item.getProduto().getPreco()); // Preço unitário do produto
+            System.out.println("Subtotal: " + item.getSubTotal());          // Subtotal calculado
+            System.out.println("----------------------------");
+        }
